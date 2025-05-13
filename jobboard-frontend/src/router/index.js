@@ -1,17 +1,34 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import AdminDashboard from '../AdminDashboard.vue'
-import AdminStats from '../AdminStats.vue'
-import AdminUsers from '../AdminUsers.vue'
+
+import { createRouter, createWebHistory } from 'vue-router';
+import AdminDashboard from '../views/AdminDashboard.vue';
+import AdminStats from '../views/AdminStats.vue';
+import AdminUsers from '../views/AdminUsers.vue';
 
 const routes = [
-  { path: '/admin', component: AdminDashboard },
-  { path: '/admin/stats', component: AdminStats },
-  { path: '/admin/users', component: AdminUsers },
-]
+  {
+    path: '/admin',
+    name: 'AdminDashboard',
+    component: AdminDashboard
+  },
+  {
+    path: '/admin/stats',
+    name: 'AdminStats',
+    component: AdminStats
+  },
+  {
+    path: '/admin/users',
+    name: 'AdminUsers',
+    component: AdminUsers
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/admin'
+  }
+];
 
 const router = createRouter({
   history: createWebHistory(),
-  routes,
-})
+  routes
+});
 
-export default router
+export default router;

@@ -1,50 +1,22 @@
+// File: src/App.vue
 <template>
-  <div class="app">
-    <h1 class="title">Admin Panel</h1>
-
-    <nav class="navbar">
-      <router-link to="/admin">Jobs</router-link>
-      <router-link to="/admin/stats">Analytics</router-link>
-      <router-link to="/admin/users">Users</router-link>
-    </nav>
+  <div class="container py-4">
+    <header class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="h3">JobPilot</h1>
+      <nav>
+        <router-link class="me-3 text-decoration-none" to="/admin">Jobs</router-link>
+        <router-link class="me-3 text-decoration-none" to="/admin/stats">Analytics</router-link>
+        <router-link class="text-decoration-none" to="/admin/users">Users</router-link>
+      </nav>
+    </header>
 
     <router-view />
   </div>
 </template>
 
 <script setup>
-// مفيش حاجة هنا
 </script>
 
-<style scoped>
-.app {
-  padding: 20px;
-  font-family: Arial, sans-serif;
-}
-
-.title {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #333;
-}
-
-.navbar {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.navbar a {
-  text-decoration: none;
-  color: #333;
-  font-weight: bold;
-  padding: 6px 12px;
-  border-radius: 4px;
-  transition: background 0.2s;
-}
-
-.navbar a:hover {
-  background: #eee;
-}
+<style>
+/* Bootstrap is imported globally from main.js */
 </style>

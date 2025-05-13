@@ -38,3 +38,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/users/{id}/deactivate', [AdminUserController::class, 'deactivate']);
     Route::post('/users/{id}/activate', [AdminUserController::class, 'activate']);
 });
+
+Route::middleware(['auth:sanctum', 'admin'])->get('/users', function () {
+    return \App\Models\User::all();
+});
