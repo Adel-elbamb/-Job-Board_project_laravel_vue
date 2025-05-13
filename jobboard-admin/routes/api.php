@@ -9,6 +9,7 @@ use App\Http\Controllers\JobModerationController;
 use App\Http\Controllers\AdminStatsController;
 use App\Http\Controllers\AdminUserController;
 
+
 //  تسجيل الدخول
 Route::post('/login', function (Request $request) {
     $user = User::where('email', $request->email)->first();
@@ -35,6 +36,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 
     Route::get('/admin/stats', [AdminStatsController::class, 'index']);
 
+    Route::get('/users', [AdminUserController::class, 'index']);
     Route::post('/users/{id}/deactivate', [AdminUserController::class, 'deactivate']);
     Route::post('/users/{id}/activate', [AdminUserController::class, 'activate']);
 });
@@ -42,3 +44,12 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 Route::middleware(['auth:sanctum', 'admin'])->get('/users', function () {
     return \App\Models\User::all();
 });
+
+
+
+
+
+
+
+
+

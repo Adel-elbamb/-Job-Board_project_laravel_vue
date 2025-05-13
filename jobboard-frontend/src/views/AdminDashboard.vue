@@ -29,41 +29,42 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
-
-const jobs = ref([])
-const token = '1|ApGiaGqteOE9y2GXts7ITjPfZ6LG3lzNktTDZsWV73e0a8fa' // ← التوكن بتاع الأدمن
-
-const fetchJobs = () => {
-  fetch('http://127.0.0.1:8000/api/jobs?status=pending', {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
-    .then(res => res.json())
-    .then(data => {
-      jobs.value = data
-    })
-}
-
-const approveJob = (id) => {
-  fetch(`http://127.0.0.1:8000/api/jobs/${id}/approve`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  }).then(() => fetchJobs())
-}
-
-const rejectJob = (id) => {
-  fetch(`http://127.0.0.1:8000/api/jobs/${id}/reject`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  }).then(() => fetchJobs())
-}
-
-onMounted(fetchJobs)
+<script>
+export default {
+  data() {
+    return {
+      jobs: [],
+    };
+  },
+  mounted() {
+    this.fetchJobs();
+  },
+  methods: {
+    async fetchJobs() {
+      const res = await fetch('http://127.0.0.1:8000/api/jobs?status=pending');
+      const data = await res.json();
+      this.jobs = data;
+    },
+    async approveJob(id) {
+      await fetch(`http://127.0.0.1:8000/api/jobs/${id}/approve`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer 2|4jOEH552om4N6CFzaLMWhDLdzQ2enuUa2hMdnjBI1167cb8f', // ✨ بدلي التوكين
+        },
+      });
+      this.fetchJobs(); // نرجع نجيب الوظائف بعد التعديل
+    },
+    async rejectJob(id) {
+      await fetch(`http://127.0.0.1:8000/api/jobs/${id}/reject`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer 2|4jOEH552om4N6CFzaLMWhDLdzQ2enuUa2hMdnjBI1167cb8f',
+        },
+      });
+      this.fetchJobs();
+    },
+  },
+};
 </script>

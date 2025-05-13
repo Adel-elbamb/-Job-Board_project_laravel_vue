@@ -9,7 +9,7 @@ class JobModerationController extends Controller
 {
     public function approve($id)
     {
-        $job = Job::findOrFail($id);
+        $job = \App\Models\Job::findOrFail($id);
         $job->status = 'approved';
         $job->save();
 
@@ -18,10 +18,11 @@ class JobModerationController extends Controller
 
     public function reject($id)
     {
-        $job = Job::findOrFail($id);
+        $job = \App\Models\Job::findOrFail($id);
         $job->status = 'rejected';
         $job->save();
 
         return response()->json(['message' => 'Job rejected']);
     }
+
 }
