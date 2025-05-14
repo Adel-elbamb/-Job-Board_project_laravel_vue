@@ -5,30 +5,36 @@
         <div class="card">
           <div class="card-header">Login Form</div>
           <div class="card-body">
-            <form>
+            <div v-if="error" class="alert alert-danger">
+              <p>{{ error.message || "Failed to login, please try again" }}</p>
+              <ul v-if="error.errors">
+                <li v-for="(messages, field) in error.errors" :key="field">
+                  {{ field }}: {{ messages.join(", ") }}
+                </li>
+              </ul>
+            </div>
+            <form @submit.prevent="handleLogin">
               <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">
-                  User Name</label
-                >
-
+                <label for="exampleInputEmail1" class="form-label">Email address</label>
                 <input
-                  type="text"
+                  type="email"
                   class="form-control"
-                  id="exampleInputUsername"
-                  placeholder="Enter your UserName"
+                  id="exampleInputEmail1"
+                  placeholder="Enter your Email"
+                  v-model="email"
+                  required
                 />
               </div>
 
               <div class="mb-3">
-                <label for="exampleInputPassword1" class="form-label"
-                  >Password</label
-                >
-
+                <label for="exampleInputPassword1" class="form-label">Password</label>
                 <input
                   type="password"
                   class="form-control"
                   id="exampleInputPassword1"
                   placeholder="Enter your password"
+                  v-model="password"
+                  required
                 />
               </div>
               <div class="mb-3 form-check">
@@ -37,17 +43,15 @@
                   class="form-check-input"
                   id="exampleCheck1"
                 />
-
-                <label class="form-check-label" for="exampleCheck1"
-                  >Remember me</label
-                >
+                <label class="form-check-label" for="exampleCheck1">Remember me</label>
               </div>
 
               <button type="submit" class="btn btn-primary">Login</button>
-
-              <router-link to="/register">Register</router-link>
-
-              <router-link to="/ForgetPassword">Forgot Password?</router-link>
+              
+              <div class="mt-3">
+                <router-link to="/register" class="me-3">Register</router-link>
+                <router-link to="/ForgetPassword">Forgot Password?</router-link>
+              </div>
             </form>
           </div>
         </div>
@@ -56,7 +60,82 @@
   </div>
 </template>
 
+<script>
+import axios from "axios";
+import { useUserStore } from "@/store/user";
+import { useRouter } from "vue-router";
+
+// Configure axios
+const apiBaseUrl = "http://localhost:8000/api";
+
+export default {
+  name: "Login",
+  data() {
+    return {
+      email: "",
+      password: "",
+      error: null,
+    };
+  },
+  setup() {
+    const userStore = useUserStore();
+    const router = useRouter();
+    return { userStore, router };
+  },
+  methods: {
+    async handleLogin() {
+      try {
+        this.error = null;
+        
+
+        const response = await axios.post(
+  `${apiBaseUrl}/login`, // <--- تم التصحيح هنا: استخدام backticks ``
+  {
+    email: this.email,
+    password: this.password,
+  },
+  {
+    withCredentials: true,
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    }
+  }
+);
+        
+
+        console.log("Login successful:", response.data);
+        
+
+        this.userStore.login(response.data.token, response.data.role);
+        
+        if (response.data.role === "admin") {
+          this.router.push("/dashboard/admindashboard");
+        } else if (response.data.role === "employer") {
+          this.router.push("/dashboard/employerdashboard");
+        } else {
+          this.router.push("/dashboard/candidatedashboard");
+        }
+      } catch (error) {
+        if (error.response && error.response.data) {
+          this.error = error.response.data;
+        } else {
+          this.error = { message: "Failed to login. Please try again." };
+        }
+        console.error("Login failed:", error.response?.data || error.message);
+      }
+    },
+  },
+};
+</script>
+
 <style scoped>
+.alert-danger {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border-radius: 10px;
+}
+
 body {
   background-color: #e9f0f7;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -149,44 +228,3 @@ a:hover {
   text-decoration: underline;
 }
 </style>
-
-<script>
-import axios from "axios";
-import { useUserStore } from "@/store/user";
-import { useRouter } from "vue-router";
-
-export default {
-  name: "Login",
-  data() {
-    return {
-      email: "",
-      password: "",
-    };
-  },
-  setup() {
-    const userStore = useUserStore();
-    const router = useRouter();
-    return { userStore, router };
-  },
-  methods: {
-    async handleLogin() {
-      try {
-        const response = await axios.post("/api/login", {
-          username: this.username,
-          password: this.password,
-        });
-        this.userStore.login(response.data.token, response.data.role);
-        if (response.data.role === "admin") {
-          this.router.push("/dashboard/admin");
-        } else if (response.data.role === "employer") {
-          this.router.push("/dashboard/employer");
-        } else {
-          this.router.push("/dashboard/candidate");
-        }
-      } catch (error) {
-        console.error("Login failed", error);
-      }
-    },
-  },
-};
-</script>

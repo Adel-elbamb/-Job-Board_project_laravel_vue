@@ -5,27 +5,21 @@
         <div class="card">
           <div class="card-header">Forgot Password</div>
           <div class="card-body">
-            <form>
+            <form @submit.prevent="handleForgotPassword">
               <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label"
-                  >Email address</label
-                >
-                <input
+                <label for="emailInput" class="form-label">Email address</label> <input
                   type="email"
                   class="form-control"
-                  id="exampleInputEmail1"
+                  id="emailInput"
                   aria-describedby="emailHelp"
                   placeholder="Enter your Email address"
                   required
-                />
+                  v-model="email" />
               </div>
               <button type="submit" class="btn btn-primary w-100">
                 Send Reset Link
               </button>
-
-              <router-link to="/login" class="back-link"
-                >Back to Login</router-link
-              >
+              <router-link to="/login" class="back-link">Back to Login</router-link>
             </form>
           </div>
         </div>
@@ -137,12 +131,28 @@ export default {
   },
   methods: {
     async handleForgotPassword() {
+      
       try {
-        await axios.post("/api/forgot-password", { email: this.email });
-        alert("Reset link sent to your email");
-        this.router.push("/auth/login");
+        const response = await axios.post("http://localhost:8000/api/forgot-password", {
+          email: this.email,
+        });
+        alert(response.data.message || "Reset link sent to your email. Please check your inbox."); 
+        this.router.push('/login'); 
+
       } catch (error) {
-        console.error("Forgot password failed", error);
+        console.error("Forgot password failed:", error);
+        if (error.response && error.response.data) {
+          
+          this.error = error.response.data.message || "An error occurred.";
+          if (error.response.data.errors) {
+         
+       }
+          alert(error.response.data.message || "Failed to send reset link. Please check your email or try again.");
+        } else {
+          alert("An unexpected error occurred. Please try again.");
+        }
+      } finally {
+ 
       }
     },
   },
