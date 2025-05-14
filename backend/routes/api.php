@@ -1,55 +1,19 @@
 <?php
 
 use Illuminate\Http\Request;
+use App\Http\Controllers\API\JobController;
+
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Hash;
-use App\Models\User;
-use App\Models\Job;
-use App\Http\Controllers\JobModerationController;
-use App\Http\Controllers\AdminStatsController;
-use App\Http\Controllers\AdminUserController;
+use App\Http\Middleware\EnsureUserIsEmployer;
 
+Route::get('/user', function (Request $request) {
+    return $request->user();
+})->middleware('auth:sanctum');
 
-//  تسجيل الدخول
-Route::post('/login', function (Request $request) {
-    $user = User::where('email', $request->email)->first();
-
-    if (! $user || ! Hash::check($request->password, $user->password)) {
-        return response()->json(['error' => 'Invalid credentials'], 401);
-    }
-
-    $token = $user->createToken('admin-token')->plainTextToken;
-
-    return response()->json(['token' => $token]);
+Route::middleware(['auth:sanctum', EnsureUserIsEmployer::class])->group(function () {
+    Route::get('/jobs', [JobController::class, 'index']);
+    Route::get('/jobs/{id}', [JobController::class, 'show']);
+    Route::post('/jobs', [JobController::class, 'store']);
+    Route::put('/jobs/{job}', [JobController::class, 'update']);
+    Route::delete('/jobs/{job}', [JobController::class, 'destroy']);
 });
-
-//  عرض الوظائف حسب الحالة
-Route::get('/jobs', function (Request $request) {
-    $status = $request->query('status', 'pending');
-    return Job::where('status', $status)->get();
-});
-
-//  Routes محمية
-Route::middleware(['auth:sanctum', 'admin'])->group(function () {
-    Route::post('/jobs/{id}/approve', [JobModerationController::class, 'approve']);
-    Route::post('/jobs/{id}/reject', [JobModerationController::class, 'reject']);
-
-    Route::get('/admin/stats', [AdminStatsController::class, 'index']);
-
-    Route::get('/users', [AdminUserController::class, 'index']);
-    Route::post('/users/{id}/deactivate', [AdminUserController::class, 'deactivate']);
-    Route::post('/users/{id}/activate', [AdminUserController::class, 'activate']);
-});
-
-Route::middleware(['auth:sanctum', 'admin'])->get('/users', function () {
-    return \App\Models\User::all();
-});
-
-
-
-
-
-
-
-
-
