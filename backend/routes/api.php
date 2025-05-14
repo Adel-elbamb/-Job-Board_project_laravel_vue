@@ -1,33 +1,55 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\ApiController;
-use App\Http\Controllers\ProfileManagementController;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+use App\Models\Job;
+use App\Http\Controllers\JobModerationController;
+use App\Http\Controllers\AdminStatsController;
+use App\Http\Controllers\AdminUserController;
 
 
+//  تسجيل الدخول
+Route::post('/login', function (Request $request) {
+    $user = User::where('email', $request->email)->first();
 
-Route::post('/register', [RegisterController::class, 'register']);
-Route::post('/login', [LoginController::class, 'login'])->name('login');
-Route::post('/forgot-password', [ForgotPasswordController::class, 'forgotPassword']);
+    if (! $user || ! Hash::check($request->password, $user->password)) {
+        return response()->json(['error' => 'Invalid credentials'], 401);
+    }
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::put('/profile', [ProfileManagementController::class, 'update']);
+    $token = $user->createToken('admin-token')->plainTextToken;
 
-    Route::get('/dashboard/employerdashboard', function () {
-        return response()->json(['message' => 'Welcome Employer']);
-    })->middleware(\App\Http\Middleware\RestrictTo::class .'restrictTo:employer');
-
-    Route::get('/dashboard/candidatedashboard', function () {
-        return response()->json(['message' => 'Welcome Candidate']);
-    })->middleware(\App\Http\Middleware\RestrictTo::class . ':candidate');
-
-    Route::get('/dashboard/admindashboard', function () {
-        return response()->json(['message' => 'Welcome Admin']);
-    })->middleware(\App\Http\Middleware\RestrictTo::class .'restrictTo:admin');
+    return response()->json(['token' => $token]);
 });
+
+//  عرض الوظائف حسب الحالة
+Route::get('/jobs', function (Request $request) {
+    $status = $request->query('status', 'pending');
+    return Job::where('status', $status)->get();
+});
+
+//  Routes محمية
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::post('/jobs/{id}/approve', [JobModerationController::class, 'approve']);
+    Route::post('/jobs/{id}/reject', [JobModerationController::class, 'reject']);
+
+    Route::get('/admin/stats', [AdminStatsController::class, 'index']);
+
+    Route::get('/users', [AdminUserController::class, 'index']);
+    Route::post('/users/{id}/deactivate', [AdminUserController::class, 'deactivate']);
+    Route::post('/users/{id}/activate', [AdminUserController::class, 'activate']);
+});
+
+Route::middleware(['auth:sanctum', 'admin'])->get('/users', function () {
+    return \App\Models\User::all();
+});
+
+
+
+
+
+
 
 
 
