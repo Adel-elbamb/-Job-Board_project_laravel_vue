@@ -1,22 +1,24 @@
-// File: src/App.vue
 <template>
-  <div class="container py-4">
-    <header class="d-flex justify-content-between align-items-center mb-4">
-      <h1 class="h3">JobPilot</h1>
-      <nav>
-        <router-link class="me-3 text-decoration-none" to="/admin">Jobs</router-link>
-        <router-link class="me-3 text-decoration-none" to="/admin/stats">Analytics</router-link>
-        <router-link class="text-decoration-none" to="/admin/users">Users</router-link>
-      </nav>
-    </header>
-
-    <router-view />
+  <div>
+    <router-view></router-view>
   </div>
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'; // إذا كنت بحاجة إلى الراوتر
 </script>
 
-<style>
-/* Bootstrap is imported globally from main.js */
+<style scoped>
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.vue:hover {
+  filter: drop-shadow(0 0 2em #42b883aa);
+}
 </style>
