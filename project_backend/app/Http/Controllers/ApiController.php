@@ -7,19 +7,15 @@ use Illuminate\Http\JsonResponse;
 class ApiController extends Controller
 {
     protected function successResponse($data, $message = 'Success', $status = 200): JsonResponse
-    {
-        return response()->json([
-            'status' => 'success',
-            'message' => $message,
-            'data' => $data,
-        ], $status);
-    }
+{
+    $response = [
+        'status' => 'success',
+        'message' => $message,
+    ];
 
-    protected function errorResponse($message, $status = 400): JsonResponse
-    {
-        return response()->json([
-            'status' => 'fail',
-            'message' => $message,
-        ], $status);
-    }
+
+    $response = array_merge($response, $data);
+
+    return response()->json($response, $status);
+}
 }

@@ -2,28 +2,32 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
-
+use App\Http\Controllers\ApiController;
 use App\Http\Controllers\ProfileManagementController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 
 
+
 Route::post('/register', [RegisterController::class, 'register']);
-Route::post('/login', [LoginController::class, 'login']);
+Route::post('/login', [LoginController::class, 'login'])->name('login');
 Route::post('/forgot-password', [ForgotPasswordController::class, 'forgotPassword']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile', [ProfileManagementController::class, 'update']);
 
-    Route::get('/dashboard/employer', function () {
+    Route::get('/dashboard/employerdashboard', function () {
         return response()->json(['message' => 'Welcome Employer']);
-    })->middleware('restrictTo:employer');
+    })->middleware(\App\Http\Middleware\RestrictTo::class .'restrictTo:employer');
 
-    Route::get('/dashboard/candidate', function () {
+    Route::get('/dashboard/candidatedashboard', function () {
         return response()->json(['message' => 'Welcome Candidate']);
-    })->middleware('restrictTo:candidate');
+    })->middleware(\App\Http\Middleware\RestrictTo::class . ':candidate');
 
-    Route::get('/dashboard/admin', function () {
+    Route::get('/dashboard/admindashboard', function () {
         return response()->json(['message' => 'Welcome Admin']);
-    })->middleware('restrictTo:admin');
+    })->middleware(\App\Http\Middleware\RestrictTo::class .'restrictTo:admin');
 });
+
+
+

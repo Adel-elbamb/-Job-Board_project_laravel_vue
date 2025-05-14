@@ -21,7 +21,11 @@ class LoginController extends ApiController
 
         return $this->successResponse([
             'token' => $token,
-            'role' => $user->role,
+            'user' => [
+                        'id' => $user->id,
+                        'role' => $user->role,
+                        'email' => $user->email,
+            ],
         ]);
     }
 }
