@@ -3,62 +3,60 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Application;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ApplicationController extends Controller
 {
-    // Candidate applies to a job
+    public function __construct()
+    {
+        $this->middleware(['auth:sanctum', 'restrictTo:candidate']);
+    }
+
     public function store(Request $request)
     {
-        $request->validate([
-            'job_id' => 'required|exists:jobs,id',
-            'resume' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
-            'contact_email' => 'nullable|email',
-            'contact_phone' => 'nullable|string|max:20',
-        ]);
-
-        $resumePath = null;
-        if ($request->hasFile('resume')) {
-            $resumePath = $request->file('resume')->store('resumes', 'public');
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'Please login to submit an application'], 401);
         }
 
-        $application = Application::create([
-            'user_id' => Auth::id(),
-            'job_id' => $request->job_id,
-            'resume_path' => $resumePath,
-            'contact_email' => $request->contact_email,
-            'contact_phone' => $request->contact_phone,
-            'status' => 'pending',
+        $validated = $request->validate([
+            'job_id' => 'required|exists:jobs,id',
+            'contact_info' => 'nullable|string',
+            'resume' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
         ]);
 
-        return response()->json(['message' => 'Application submitted successfully', 'application' => $application], 201);
+        $application = Application::create([
+            'user_id' => $user->id,
+            'job_id' => $validated['job_id'],
+            'contact_info' => $validated['contact_info'] ?? null,
+            'resume' => $request->hasFile('resume') ? $request->file('resume')->store('resumes') : null,
+        ]);
+
+        return response()->json([
+            'message' => 'Application submitted',
+            'data' => ['id' => $application->id],
+        ], 201);
     }
 
-    // View candidate's applications
     public function myApplications()
     {
-        $applications = Application::with('job')
-            ->where('user_id', Auth::id())
-            ->latest()
-            ->get();
-
-        return response()->json($applications);
+        $applications = Application::where('user_id', auth()->id)->with('job')->get();
+        if ($applications->isEmpty()) {
+            return response()->json(['message' => 'No applications found', 'data' => []], 200);
+        }
+        return response()->json(['data' => $applications], 200);
     }
 
-    // Cancel (delete) an application
     public function destroy($id)
     {
-        $application = Application::where('user_id', Auth::id())->findOrFail($id);
-
+        $application = Application::where('user_id', auth()->id)->findOrFail($id);
         if ($application->resume_path) {
             Storage::disk('public')->delete($application->resume_path);
         }
-
         $application->delete();
-
-        return response()->json(['message' => 'Application canceled successfully']);
+        return response()->json(['message' => 'Application canceled', 'data' => ['id' => $id]], 200);
     }
 }

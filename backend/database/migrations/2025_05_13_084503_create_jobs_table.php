@@ -4,34 +4,27 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('jobs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employer_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('title');
             $table->text('description');
             $table->text('responsibilities')->nullable();
+            $table->string('qualifications')->nullable();
+            $table->decimal('salary_from', 10, 2)->nullable();
+            $table->decimal('salary_to', 10, 2)->nullable();
             $table->string('location');
-            $table->string('type'); // e.g., remote, on-site, hybrid
-            $table->string('category')->nullable();
-            $table->decimal('salary_min', 10, 2)->nullable();
-            $table->decimal('salary_max', 10, 2)->nullable();
+            $table->enum('job_type', ['remote', 'on-site', 'hybrid'])->default('on-site');
             $table->date('deadline');
-            $table->string('status')->default('pending'); // pending, approved, rejected
-            $table->string('logo_path')->nullable();
+            $table->string('company_logo')->nullable();
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('jobs');

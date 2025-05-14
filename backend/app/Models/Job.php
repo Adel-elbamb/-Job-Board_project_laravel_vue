@@ -7,29 +7,28 @@ use Illuminate\Database\Eloquent\Model;
 
 class Job extends Model
 {
+    //
     use HasFactory;
 
-    // Add employer_id to fillable
     protected $fillable = [
-        'employer_id',
+        'user_id',
         'title',
         'description',
         'responsibilities',
+        'qualifications',
+        'salary_from',
+        'salary_to',
         'location',
-        'type',
-        'category',
-        'salary_min',
-        'salary_max',
+        'job_type',
         'deadline',
+        'company_logo',
         'status',
-        'logo_path',
     ];
-    //
-    public function employer()
-    {
-        return $this->belongsTo(User::class, 'employer_id');
-    }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
     public function applications()
     {
         return $this->hasMany(Application::class);
